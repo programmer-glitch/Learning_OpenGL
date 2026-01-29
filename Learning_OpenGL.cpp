@@ -27,26 +27,42 @@ int main() {
 		return -1;
 	}
 	glViewport(0, 0, 800, 600);
-
+	
+	// function declaration start
 	void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
+	void processInput(GLFWwindow * window);
+	// function declaration end
+
 
 	// set window resize callback
 	glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
 
-	// Render Loop
+	// Render Loop start
 	while (!(glfwWindowShouldClose(window))) {
+		processInput(window);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	} 
-	// End of Render Loop
+	// Render Loop end
 
 	glfwTerminate();
 
 	return 0;
 }
 
+// function definition start
+
 // Callback function whenever the window is resized
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
+
+// Process input
+void processInput(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+}
+
+// function definition end
