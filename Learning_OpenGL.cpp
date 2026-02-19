@@ -1,6 +1,8 @@
 #include <iostream>
 #include "glad/include/glad/glad.h" // API for interacting with the GPU using OpenGL specification
-#include "glfw/include/GLFW/glfw3.h" // To create an OpenGL context and window with inout support
+#include "glfw/include/GLFW/glfw3.h" // API to create an OpenGL context and window with inout support
+#include <fstream>
+#include <string>
 
 
 
@@ -28,6 +30,8 @@ int main() {
 	}
 	glViewport(0, 0, 800, 600);
 	
+
+
 	// function declarations start
 
 	void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
@@ -35,19 +39,25 @@ int main() {
 
 	// function declarations end
 
+
+
 	// set window resize callback
 	glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
 
+
+
 	// Data Start
 
+	// Vertex data start
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
 		0.0f, 0.5f, 0.0f,
 		0.5f, 0.5f, 0.0f
 	};
+	// Vertex data end
 
 	unsigned int VBO;
-	// generate a buffer object name in OpenGL and assign one unique integer to the VBO variable
+	// generate a buffer object name (unique identifier) in OpenGL and store it in VBO
 	glGenBuffers(1, &VBO);
 
 	// use the buffer object as a vertex buffer object. Anytime we target GL_ARRAY_BUFFER,
@@ -59,6 +69,45 @@ int main() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	// Data End
+
+
+
+	// GLSL program start
+
+	// Vertex shader start
+
+	std::string vertexShaderString;
+	std::ifstream vertexShaderFile("vertexShaders.glsl");
+	if (!(vertexShaderFile.is_open())) {
+		std::cout<< "Error! \n could not open the vertex shader file.\n";
+		return 1;
+	}
+	std::string buffer;
+	while (std::getline(vertexShaderFile, buffer)) {
+		vertexShaderString += buffer + '\n';
+	}
+	vertexShaderFile.close();
+
+	const char* vertexShaderSource = vertexShaderString.c_str();
+	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &(vertexShaderSource), NULL);
+	glCompileShader(vertexShader);
+	int compileStatus;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
+	if (compileStatus) {
+		std::cout<<"vertex shader compilation successful!\n";
+	}
+	else {
+		char shaderLog[1000];
+		glGetShaderInfoLog(vertexShader, sizeof(shaderLog), NULL, shaderLog);
+		std::cout<<"Error!, the shader could not be compiled\n"<<shaderLog<<std::endl;
+	}
+
+	// Vertex shader end
+
+	// GLSL program end
+
+
 
 	// Render Loop start
 
@@ -84,6 +133,8 @@ int main() {
 
 	return 0;
 }
+
+
 
 // function definition start
 
