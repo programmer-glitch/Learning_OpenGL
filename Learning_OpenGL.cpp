@@ -51,8 +51,8 @@ int main() {
 	// Vertex data start
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
-		0.0f, 0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f
+		0.0f, 1.0f, 0.0f,
+		0.5f, -0.5f, 0.0f
 	};
 	// Vertex data end
 
@@ -76,38 +76,108 @@ int main() {
 
 	// Vertex shader start
 
-	std::string vertexShaderString;
-	std::ifstream vertexShaderFile("vertexShaders.glsl");
+	std::string vertexShaderStr;
+	std::ifstream vertexShaderFile("vertexShader.glsl");
 	if (!(vertexShaderFile.is_open())) {
-		std::cout<< "Error! \n could not open the vertex shader file.\n";
+		std::cout<< "Error! could not open Vertex Shader file!\n";
 		return 1;
 	}
 	std::string buffer;
 	while (std::getline(vertexShaderFile, buffer)) {
-		vertexShaderString += buffer + '\n';
+		vertexShaderStr += buffer + '\n';
 	}
 	vertexShaderFile.close();
 
-	const char* vertexShaderSource = vertexShaderString.c_str();
+	const char* vertexShaderSource = vertexShaderStr.c_str();
 	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &(vertexShaderSource), NULL);
 	glCompileShader(vertexShader);
 	int compileStatus;
+	char shaderLog[1000];
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
 	if (compileStatus) {
 		std::cout<<"vertex shader compilation successful!\n";
 	}
 	else {
-		char shaderLog[1000];
 		glGetShaderInfoLog(vertexShader, sizeof(shaderLog), NULL, shaderLog);
-		std::cout<<"Error!, the shader could not be compiled\n"<<shaderLog<<std::endl;
+		std::cout<<"Error!, vertex shader failed to compile\n"<<shaderLog<<std::endl;
+		return 1;
 	}
 
 	// Vertex shader end
 
+	// Fragment shader start
+
+	std::string fragmentShaderStr;
+	std::ifstream fragmentShaderFile("fragmentShader.glsl");
+	if (!fragmentShaderFile.is_open()) {
+		std::cout<<"Error! Could not open Fragment Shader File!\n";
+		return 1;
+	}
+	while (std::getline(fragmentShaderFile, buffer)) {
+		fragmentShaderStr += buffer + '\n';
+	}
+	fragmentShaderFile.close();
+
+	const char* fragmentShaderSource = fragmentShaderStr.c_str();
+	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glCompileShader(fragmentShader);
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compileStatus);
+	if (compileStatus) {
+		std::cout<<"Fragment Shader compilation successful!\n";
+	}
+	else {
+		glGetShaderInfoLog(fragmentShader, sizeof(shaderLog), NULL, shaderLog);
+		std::cout<<"Error!, fragment shader failed to compile\n"<<shaderLog<<std::endl;
+		return 1;
+	}
+
+	// Fragment shader end
+
+	// Shader Program (for rendering) start
+
+	unsigned int shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+	int linkingStatus;
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkingStatus);
+	if (linkingStatus) {
+		std::cout<<"Shader Program object linking successful!\n";
+	}
+	else {
+		glGetProgramInfoLog(shaderProgram, sizeof(shaderLog), NULL, shaderLog);
+		std::cout<<"Error, Shader program linking failed\n"<<shaderLog<<std::endl;
+	}
+	glUseProgram(shaderProgram);
+
+	// Shader Program end
+
 	// GLSL program end
 
 
+
+	// Vertex data format fed to GPU start
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// Vertex data format fed to GPU end
+	
+
+
+	// Vertex array object start
+
+	unsigned int VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// vertex array object end
 
 	// Render Loop start
 
@@ -120,6 +190,10 @@ int main() {
 		glClearColor(0.25f, 0.25f, 1.0f, 1.0f);
 		// replace the current state with the previously declared display state
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		// rendering end
 

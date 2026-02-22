@@ -139,7 +139,8 @@
     <ClCompile Include="Learning_OpenGL.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertexShaders.glsl" />
+    <None Include="fragmentShader.glsl" />
+    <None Include="vertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

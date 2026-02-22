@@ -23,7 +23,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertexShaders.glsl">
+    <None Include="vertexShader.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="fragmentShader.glsl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
