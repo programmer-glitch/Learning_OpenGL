@@ -50,23 +50,48 @@ int main() {
 
 	// Vertex data start
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.5f, -0.5f, 0.0f
+	// first triangle
+		-0.5f, -0.5f, 0.0f, // EBO index 0
+		-0.5f, 0.5f, 0.0f, // EBO index 1
+		0.5f, -0.5f, 0.0f, // EBO index 2
+
+	// second triangle
+		0.5f, 0.5f, 0.0f, // EBO index 3
+		0.5f, -0.5f, 0.0f,
+		1.0f, -0.5f, 0.0f,
 	};
+
 	// Vertex data end
 
 	unsigned int VBO;
 	// generate a buffer object name (unique identifier) in OpenGL and store it in VBO
 	glGenBuffers(1, &VBO);
 
+	unsigned int indicies[]{
+		0, 1, 2,
+		1, 2, 3
+	};
+	// Element buffer object
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+
+	// Vertex array object start
+
+	unsigned int VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
 	// use the buffer object as a vertex buffer object. Anytime we target GL_ARRAY_BUFFER,
 	// we would refer to the recently bound buffer which in this case would be VBO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
 	// allocate memory on the GPU for the buffer object currently bound to GL_ARRAY_BUFFER which in this case is VBO
 	// then store the vertices with a hint on how it would be accessed in this case GL_STATIC_DRAW
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// vertex array object end
 
 	// Data End
 
@@ -167,17 +192,7 @@ int main() {
 	
 
 
-	// Vertex array object start
-
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// vertex array object end
+	
 
 	// Render Loop start
 
@@ -191,9 +206,12 @@ int main() {
 		// replace the current state with the previously declared display state
 		glClear(GL_COLOR_BUFFER_BIT);
 
+
+		// Update state and render current state
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 
 		// rendering end
 
