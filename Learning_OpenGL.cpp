@@ -55,7 +55,10 @@ int main() {
 		-0.5f, 0.5f, 0.0f, // EBO index 1
 		0.5f, -0.5f, 0.0f, // EBO index 2
 
-	// second triangle
+	};
+
+	float vertices2[]{
+		// second triangle
 		0.5f, 0.5f, 0.0f, // EBO index 3
 		0.5f, -0.5f, 0.0f,
 		1.0f, -0.5f, 0.0f,
@@ -85,9 +88,24 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	// allocate memory on the GPU for the buffer object currently bound to GL_ARRAY_BUFFER which in this case is VBO
 	// then store the vertices with a hint on how it would be accessed in this case GL_STATIC_DRAW
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// 
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), 0, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// should be fine, doesn't change OpenGL state
+	unsigned int VBO2;
+	glGenBuffers(1, &VBO2);
+
+	unsigned int VAO2;
+	glGenVertexArrays(1, &VAO2);
+	glBindVertexArray(VAO2);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), 0, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, 9 * sizeof(float), vertices2);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
@@ -158,6 +176,33 @@ int main() {
 		return 1;
 	}
 
+	// ------------- Second Triangle ---------------
+
+	std::string fragmentShaderStr2;
+	std::ifstream fragmentShaderFile2("fragmentShader2.glsl");
+	if (!fragmentShaderFile2.is_open()) {
+		std::cout<<"Error! Could not open Fragment Shader File!\n";
+		return 1;
+	}
+	while (std::getline(fragmentShaderFile2, buffer)) {
+		fragmentShaderStr2 += buffer + '\n';
+	}
+	fragmentShaderFile2.close();
+
+	const char* fragmentShaderSource2 = fragmentShaderStr2.c_str();
+	unsigned int fragmentShader2 = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader2, 1, &fragmentShaderSource2, NULL);
+	glCompileShader(fragmentShader2);
+	glGetShaderiv(fragmentShader2, GL_COMPILE_STATUS, &compileStatus);
+	if (compileStatus) {
+		std::cout<<"Fragment Shader compilation successful!\n";
+	}
+	else {
+		glGetShaderInfoLog(fragmentShader2, sizeof(shaderLog), NULL, shaderLog);
+		std::cout<<"Error!, fragment shader failed to compile\n"<<shaderLog<<std::endl;
+		return 1;
+	}
+
 	// Fragment shader end
 
 	// Shader Program (for rendering) start
@@ -177,20 +222,22 @@ int main() {
 	}
 	glUseProgram(shaderProgram);
 
+
+	unsigned int shaderProgram2 = glCreateProgram();
+	glAttachShader(shaderProgram2, vertexShader);
+	glAttachShader(shaderProgram2, fragmentShader2);
+	glLinkProgram(shaderProgram2);
+	glGetProgramiv(shaderProgram2, GL_LINK_STATUS, &linkingStatus);
+	if (linkingStatus) {
+		std::cout << "Shader Program object linking successful!\n";
+	}
+	else {
+		glGetProgramInfoLog(shaderProgram2, sizeof(shaderLog), NULL, shaderLog);
+		std::cout << "Error, Shader program linking failed\n" << shaderLog << std::endl;
+	}
 	// Shader Program end
 
 	// GLSL program end
-
-
-
-	// Vertex data format fed to GPU start
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// Vertex data format fed to GPU end
-	
-
 
 	
 
@@ -210,7 +257,16 @@ int main() {
 		// Update state and render current state
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+
+		// ---------- Second Triangle -----------
+
+		glUseProgram(shaderProgram2);
+		glBindVertexArray(VAO2);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+		
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 
 		// rendering end
