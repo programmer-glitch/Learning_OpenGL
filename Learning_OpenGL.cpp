@@ -53,8 +53,8 @@ int main() {
 	// first rectangle with vertices, color and texel floats/coordinates
 		-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // EBO index 0
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // EBO index 1
-		 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,// EBO index 2
-		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f// EBO index 3 
+		 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // EBO index 2
+		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // EBO index 3 
 
 	};
 
@@ -147,7 +147,7 @@ int main() {
 	glEnableVertexAttribArray(1);
 
 	// vertex texel (or texture map) coordinates
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * (sizeof(float))));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * (sizeof(float))));
 	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -188,7 +188,10 @@ int main() {
 		// Update state and render current state
 		shader1.use();
 		shader1.setFloat3("vertexOffset", 0.0f, 0.0f, 0.0f);
+		shader1.setInt("ourTexture", 0);
 		glBindVertexArray(VAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 		
