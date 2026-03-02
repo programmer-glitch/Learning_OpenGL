@@ -1,9 +1,11 @@
 #include <iostream>
-#include "glad/include/glad/glad.h" // API for interacting with the GPU using OpenGL specification
+#include "glad/include/glad/glad.h" // API for interacting with the GPU using OpenGL specification.
 #include "glfw/include/GLFW/glfw3.h" // API to create an OpenGL context and window with inout support
 #include <fstream>
 #include <string>
 #include "Shader.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 
 
@@ -46,23 +48,64 @@ int main() {
 
 	// Data Start
 
-	// Vertex data start
+	// Vertex data and coordinates start
 	float vertices[] = {
-	// first triangle with color floats
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // EBO index 0
-		-0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,// EBO index 1
-		-1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,// EBO index 2
+	// first rectangle with vertices, color and texel floats/coordinates
+		-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // EBO index 0
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // EBO index 1
+		 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,// EBO index 2
+		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f// EBO index 3 
 
 	};
 
 	float vertices2[]{
 		// second triangle
-		0.5f, 0.5f, 0.0f, // EBO index 3
-		-0.5f, 0.5f, 0.0f, // EBO index 1
-		0.5f, -0.5f, 0.0f, // EBO index 2
+		-0.7f, -0.7f, 0.0f,
+		 0.0f, 0.7f, 0.0f, 
+		 0.7f, -0.7f, 0.0f,
 	};
 
-	// Vertex data end
+	// Vertex data and coordinates end
+
+
+	// Texture data and coordinates start
+
+	// generating a texture
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Texture Horizontal and vertical repitition on the model
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+	// Texture mipmap interpolation for both minification and magnification
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	//Texture border color (if needed)
+	/*float textureBorderColor[] = {1.0f, 1.0f, 0.0f, 1.0f};
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, textureBorderColor);*/
+
+	// Texture pixel (texel) interpolation for both minification and magnification
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Image width, height and number of channels
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	if (data) {
+		// generate a texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else{
+		stbi_image_free(data);
+	}
+
+	// Texture data and coordinates end
+
+	// Data end
 
 	unsigned int VBO;
 	// generate a buffer object name (unique identifier) in OpenGL and store it in VBO
@@ -70,7 +113,8 @@ int main() {
 
 	unsigned int indicies[]{
 		0, 1, 2,
-		1, 2, 3
+		1, 2, 3,
+		
 	};
 	// Element buffer object
 	unsigned int EBO;
@@ -84,16 +128,27 @@ int main() {
 	// use the buffer object as a vertex buffer object. Anytime we target GL_ARRAY_BUFFER,
 	// we would refer to the recently bound buffer which in this case would be VBO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	// allocate memory on the GPU for the buffer object currently bound to GL_ARRAY_BUFFER which in this case is VBO
 	// then store the vertices with a hint on how it would be accessed in this case GL_STATIC_DRAW
 	// 
-	glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), 0, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
+	
+	// vertex position layout in vertices array
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*(sizeof(float))));
+
+	// vertex colour layout in vertices array
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*(sizeof(float))));
 	glEnableVertexAttribArray(1);
+
+	// vertex texel (or texture map) coordinates
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * (sizeof(float))));
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
@@ -132,28 +187,30 @@ int main() {
 
 		// Update state and render current state
 		shader1.use();
-		shader1.setFloat3("vertexOffset", 0.8f, 1.0f, 0.0f);
+		shader1.setFloat3("vertexOffset", 0.0f, 0.0f, 0.0f);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+		
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+
 
 		// ---------- Second Triangle -----------
 
 		
-		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		//float timeValue = glfwGetTime();
+		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		//if (uniformColorLocation == -1) {
 		//	std::cout<<"Error!, could not get Uniform Location."<<std::endl;
 		//	return 1;
 		//}
-		shader2.use();
-		shader2.setFloat4("fragColor2", 0.7f, greenValue, 0.3f, 1.0f);
-		shader2.setFloat3("vertexOffset", 0.0f, 0.2f, 0.0f);
-		glBindVertexArray(VAO2);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+		//shader2.use();
+		//shader2.setFloat4("fragColor2", 0.7f, greenValue, 0.3f, 1.0f);
+		//shader2.setFloat3("vertexOffset", 0.0f, 0.05f, 0.0f);
+		//glBindVertexArray(VAO2);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 		
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 
 		// rendering end
 
