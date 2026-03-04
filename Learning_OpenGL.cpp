@@ -35,10 +35,8 @@ int main() {
 	
 
 	// function declarations start
-
 	void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 	void processInput(GLFWwindow * window);
-
 	// function declarations end
 
 
@@ -49,6 +47,7 @@ int main() {
 	// Data Start
 
 	// Vertex data and coordinates start
+	
 	float vertices[] = {
 	// first rectangle with vertices, color and texel floats/coordinates
 		-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // EBO index 0
@@ -56,13 +55,6 @@ int main() {
 		 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // EBO index 2
 		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // EBO index 3 
 
-	};
-
-	float vertices2[]{
-		// second triangle
-		-0.7f, -0.7f, 0.0f,
-		 0.0f, 0.7f, 0.0f, 
-		 0.7f, -0.7f, 0.0f,
 	};
 
 	// Vertex data and coordinates end
@@ -83,14 +75,6 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
-	//Texture border color (if needed)
-	/*float textureBorderColor[] = {1.0f, 1.0f, 0.0f, 1.0f};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, textureBorderColor);*/
-
-	// Texture pixel (texel) interpolation for both minification and magnification
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 	// Image width, height and number of channels
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
@@ -111,6 +95,7 @@ int main() {
 	// generate a buffer object name (unique identifier) in OpenGL and store it in VBO
 	glGenBuffers(1, &VBO);
 
+	// EBO indicies
 	unsigned int indicies[]{
 		0, 1, 2,
 		1, 2, 3,
@@ -120,62 +105,47 @@ int main() {
 	unsigned int EBO;
 	glGenBuffers(1, &EBO);
 
-	// Vertex array object start
-
+	// Vertex array object to recording start
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 	// use the buffer object as a vertex buffer object. Anytime we target GL_ARRAY_BUFFER,
 	// we would refer to the recently bound buffer which in this case would be VBO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// use the buffer object as a Element buffer object. Anytime we target GL_ELEMENT_ARRAY_BUFFER,
+	// we would refer to the recently bound buffer which in this case would be EBO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	// allocate memory on the GPU for the buffer object currently bound to GL_ARRAY_BUFFER which in this case is VBO
 	// then store the vertices with a hint on how it would be accessed in this case GL_STATIC_DRAW
-	// 
 	glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), 0, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	
+	// allocate memory on the GPU for the buffer object currently bound to GL_ELEMENT_ARRAY_BUFFER which in this case is EBO
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
-	
 	// vertex position layout in vertices array
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	// Activate the vertex position attributes to be passed to the vertex shader program at location Zero
 	glEnableVertexAttribArray(0);
-
-
 	// vertex colour layout in vertices array
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*(sizeof(float))));
+	// Activate the vertex color attributes to be passed to the vertex shader program at location One
 	glEnableVertexAttribArray(1);
-
-	// vertex texel (or texture map) coordinates
+	// vertex texel (or texture pixel or texture map) coordinates
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * (sizeof(float))));
+	// Activate the texture map coordinates to be passed to the vertex shader program at location Two
 	glEnableVertexAttribArray(2);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
-
-	unsigned int VBO2;
-	glGenBuffers(1, &VBO2);
-
-	unsigned int VAO2;
-	glGenVertexArrays(1, &VAO2);
-	glBindVertexArray(VAO2);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), 0, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, 9 * sizeof(float), vertices2);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-
+	// Vertex array object recording end
+	
+	// Create, compile and activate Shader program
 	Shader shader1 = Shader("vertexShader.glsl", "fragmentShader.glsl");
 
-	Shader shader2 = Shader("vertexShader.glsl", "fragmentShader2.glsl");
-
+	// Create illusion of depth based on last rendered object
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
 	// Render Loop start
-
 	while (!(glfwWindowShouldClose(window))) {
+		// Lookout for window input
 		processInput(window);
 
 		// rendering start
@@ -185,34 +155,16 @@ int main() {
 		// replace the current state with the previously declared display state
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Update state and render current state
+		// Update state
 		shader1.use();
 		shader1.setFloat3("vertexOffset", 0.0f, 0.0f, 0.0f);
 		shader1.setInt("ourTexture", 0);
+		// To be doubly sure
 		glBindVertexArray(VAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
-		
+		// Render current state
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
-
-
-		// ---------- Second Triangle -----------
-
-		
-		//float timeValue = glfwGetTime();
-		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		//if (uniformColorLocation == -1) {
-		//	std::cout<<"Error!, could not get Uniform Location."<<std::endl;
-		//	return 1;
-		//}
-		//shader2.use();
-		//shader2.setFloat4("fragColor2", 0.7f, greenValue, 0.3f, 1.0f);
-		//shader2.setFloat3("vertexOffset", 0.0f, 0.05f, 0.0f);
-		//glBindVertexArray(VAO2);
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 		
 
 		// rendering end
@@ -220,14 +172,12 @@ int main() {
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	
 	// Render Loop end
 
 	glfwTerminate();
 
 	return 0;
 }
-
 
 // function definition start
 
@@ -236,12 +186,10 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
-
 // Process input
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
 }
-
 // function definition end
