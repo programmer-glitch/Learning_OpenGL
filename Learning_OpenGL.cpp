@@ -8,6 +8,8 @@
 #include "stb_image.h"
 
 
+// Global variable. Yuck!, i know but i have no choice.
+float TextureMixtransparency;
 
 int main() {
 
@@ -59,36 +61,6 @@ int main() {
 
 	// Vertex data and coordinates end
 
-
-	// Texture data and coordinates start
-
-	// generating a texture
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// Texture Horizontal and vertical repitition on the model
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-	// Texture mipmap interpolation for both minification and magnification
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
-	// Image width, height and number of channels
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
-	if (data) {
-		// generate a texture
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else{
-		stbi_image_free(data);
-	}
-
-	// Texture data and coordinates end
-
 	// Data end
 
 	unsigned int VBO;
@@ -139,30 +111,99 @@ int main() {
 	// Create, compile and activate Shader program
 	Shader shader1 = Shader("vertexShader.glsl", "fragmentShader.glsl");
 
-	// Create illusion of depth based on last rendered object
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	// ------------ TEXTURES --------------
+
+	// Texture data and coordinates start
+
+	// generating a texture
+	unsigned int texture1;
+	glGenTextures(1, &texture1);
+	glBindTexture(GL_TEXTURE_2D, texture1);
+
+	// Texture Horizontal and vertical repitition on the model
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// Texture mipmap interpolation for both minification and magnification
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Image width, height and number of channels
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	if (data) {
+		// generate a texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "failed to load image!" << std::endl;
+	}
+	stbi_image_free(data);
+
+	// second texxture
+	unsigned int texture2;
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+
+	// Texture Horizontal and vertical repitition on the model
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// Texture mipmap interpolation for both minification and magnification
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Image width, height and number of channels
+	stbi_set_flip_vertically_on_load(true);
+	data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+	if (data) {
+		// generate a texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "failed to load image!" << std::endl;
+	}
+	stbi_image_free(data);
+
+	// Texture data and coordinates end
+
+
+	// prep for rendering
+	shader1.use();
+	// set the vertex offset uniform values
+	shader1.setFloat3("vertexOffset", 0.0f, 0.0f, 0.0f);
+	//set uniform values
+	// set the location of the texture samplers
+	shader1.setInt("texture1", 0);
+	shader1.setInt("texture2", 1);
+	
+
 
 	// Render Loop start
 	while (!(glfwWindowShouldClose(window))) {
 		// Lookout for window input
 		processInput(window);
-
+		shader1.setFloat1("texMixTrans", TextureMixtransparency);
 		// rendering start
 
 		// set the state of the display color
-		glClearColor(0.25f, 0.25f, 1.0f, 1.0f);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		// replace the current state with the previously declared display state
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glActiveTexture(GL_TEXTURE0);
+		// bind texture sampler to currently active texture unit
+		glBindTexture(GL_TEXTURE_2D, texture1);
+		glActiveTexture(GL_TEXTURE1);
+		// bind texture sampler to currently active texture unit
+		glBindTexture(GL_TEXTURE_2D, texture2);
 
 		// Update state
 		shader1.use();
-		shader1.setFloat3("vertexOffset", 0.0f, 0.0f, 0.0f);
-		shader1.setInt("ourTexture", 0);
-		// To be doubly sure
+		// Rebind
 		glBindVertexArray(VAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
 		// Render current state
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 		
@@ -173,6 +214,11 @@ int main() {
 		glfwPollEvents();
 	}
 	// Render Loop end
+
+	// Free memory
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
 
@@ -190,6 +236,18 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
+	}
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		TextureMixtransparency += 0.001;
+		if (TextureMixtransparency > 0.9) {
+			TextureMixtransparency = 1.0;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		TextureMixtransparency -= 0.001;
+		if (TextureMixtransparency < 0.0) {
+			TextureMixtransparency = 0.0;
+		}
 	}
 }
 // function definition end
