@@ -86,9 +86,9 @@ public:
         glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
     }
     // ------------------------------------------------------------------------
-    void setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const
+    void setMat4(const std::string& name, int count, bool transpose, float* value) const
     {
-        glUniform4f(glGetUniformLocation(ID, name.c_str()), value1, value2, value3, value4);
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), count, transpose, value);
     }
     void setFloat3(const std::string& name, float value1, float value2, float value3) const
     {

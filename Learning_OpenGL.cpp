@@ -6,6 +6,10 @@
 #include "Shader.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "glm/glm/glm.hpp"
+#include "glm/glm/gtc/matrix_transform.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
+
 
 
 // Global variable. Yuck!, i know but i have no choice.
@@ -169,23 +173,38 @@ int main() {
 
 	// Texture data and coordinates end
 
+	// Vector transformation start
+	glm::vec3 vec(0.5f, -0.5f, 0.0f);
+	glm::mat4 trans = glm::mat4(1.0f);
+	trans = glm::translate(trans, vec);
+	trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+	std::cout << vec.x << vec.y << vec.z << std::endl;
+	// Vector transformation end
 
 	// prep for rendering
 	shader1.use();
 	// set the vertex offset uniform values
-	shader1.setFloat3("vertexOffset", 0.0f, 0.0f, 0.0f);
+	shader1.setMat4("Offset", 1, GL_FALSE, glm::value_ptr(trans));
 	//set uniform values
 	// set the location of the texture samplers
 	shader1.setInt("texture1", 0);
 	shader1.setInt("texture2", 1);
-	
 
 
 	// Render Loop start
 	while (!(glfwWindowShouldClose(window))) {
 		// Lookout for window input
 		processInput(window);
+		// update things
 		shader1.setFloat1("texMixTrans", TextureMixtransparency);
+
+		glm::mat4 trans = glm::mat4(1.0f); // redefine to reset rotation starting point
+		vec = glm::vec3(0.0f, 0.0f, 0.0f);
+		trans = glm::translate(trans, vec);
+		trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+		shader1.setMat4("Offset", 1, GL_FALSE, glm::value_ptr(trans));
 		// rendering start
 
 		// set the state of the display color
