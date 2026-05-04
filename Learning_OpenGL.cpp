@@ -12,7 +12,7 @@
 
 
 
-// Welcome to the Pseudo branch!
+// Welcome to the Pseudo test branch!
 // Global variable. Yuck!, i know but i have no choice.
 float TextureMixtransparency;
 
