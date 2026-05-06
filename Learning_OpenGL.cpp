@@ -57,10 +57,10 @@ int main() {
 	
 	float vertices[] = {
 	// first rectangle with vertices, color and texel floats/coordinates
-		-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // EBO index 0
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // EBO index 1
-		 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // EBO index 2
-		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // EBO index 3 
+		-0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // EBO index 0
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // EBO index 1
+		 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, // EBO index 2
+		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // EBO index 3 
 
 	};
 
@@ -94,22 +94,18 @@ int main() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	// allocate memory on the GPU for the buffer object currently bound to GL_ARRAY_BUFFER which in this case is VBO
 	// then store the vertices with a hint on how it would be accessed in this case GL_STATIC_DRAW
-	glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), 0, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 	// allocate memory on the GPU for the buffer object currently bound to GL_ELEMENT_ARRAY_BUFFER which in this case is EBO
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 	// vertex position layout in vertices array
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	// Activate the vertex position attributes to be passed to the vertex shader program at location Zero
 	glEnableVertexAttribArray(0);
-	// vertex colour layout in vertices array
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*(sizeof(float))));
-	// Activate the vertex color attributes to be passed to the vertex shader program at location One
-	glEnableVertexAttribArray(1);
 	// vertex texel (or texture pixel or texture map) coordinates
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * (sizeof(float))));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * (sizeof(float))));
 	// Activate the texture map coordinates to be passed to the vertex shader program at location Two
-	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(1);
 
 	// Vertex array object recording end
 	
@@ -146,7 +142,7 @@ int main() {
 	}
 	stbi_image_free(data);
 
-	// second texxture
+	// second texture
 	unsigned int texture2;
 	glGenTextures(1, &texture2);
 	glBindTexture(GL_TEXTURE_2D, texture2);
@@ -180,7 +176,6 @@ int main() {
 	trans = glm::translate(trans, vec);
 	trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-	std::cout << vec.x << vec.y << vec.z << std::endl;
 	// Vector transformation end
 
 	// prep for rendering
@@ -224,6 +219,10 @@ int main() {
 		shader1.use();
 		// Rebind
 		glBindVertexArray(VAO);
+
+		// Render mode
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 		// Render current state
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 		
