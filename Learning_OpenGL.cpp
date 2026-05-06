@@ -171,17 +171,26 @@ int main() {
 	// Texture data and coordinates end
 
 	// Vector transformation start
-	glm::vec3 vec(0.5f, -0.5f, 0.0f);
+	/*glm::vec3 vec(0.5f, -0.5f, 0.0f);
 	glm::mat4 trans = glm::mat4(1.0f);
 	trans = glm::translate(trans, vec);
 	trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+	trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));*/
+
 	// Vector transformation end
+
+	// View projection start
+
+	// conversion from local space to world space via the Model matrix
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
+	// View projection end
 
 	// prep for rendering
 	shader1.use();
 	// set the vertex offset uniform values
-	shader1.setMat4("Offset", 1, GL_FALSE, glm::value_ptr(trans));
+	shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
 	//set uniform values
 	// set the location of the texture samplers
 	shader1.setInt("texture1", 0);
@@ -195,12 +204,13 @@ int main() {
 		// update things
 		shader1.setFloat1("texMixTrans", TextureMixtransparency);
 
-		glm::mat4 trans = glm::mat4(1.0f); // redefine to reset rotation starting point
-		vec = glm::vec3(0.0f, 0.0f, 0.0f);
-		trans = glm::translate(trans, vec);
-		trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-		shader1.setMat4("Offset", 1, GL_FALSE, glm::value_ptr(trans));
+		//glm::mat4 trans = glm::mat4(1.0f); // redefine to reset rotation starting point
+		//vec = glm::vec3(0.0f, 0.0f, 0.0f);
+		//trans = glm::translate(trans, vec);
+		//trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		//trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+		//shader1.setMat4("Offset", 1, GL_FALSE, glm::value_ptr(trans));
+		
 		// rendering start
 
 		// set the state of the display color

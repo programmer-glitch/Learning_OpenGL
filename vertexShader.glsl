@@ -4,9 +4,10 @@ layout (location = 1) in vec2 aTexture;
 
 out vec4 fragColor1;
 uniform mat4 Offset;
+uniform mat4 Model;
 out vec2 TextCoord;
 
 void main(){
-gl_Position = Offset * vec4(aPos, 1.0f);
+gl_Position = Model * vec4(aPos, 1.0f);
 TextCoord = aTexture;
 }
