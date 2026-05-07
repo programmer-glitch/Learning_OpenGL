@@ -11,9 +11,6 @@
 #include "glm/glm/gtc/type_ptr.hpp"
 
 
-
-// Welcome to the Pseudo branch!
-// Global variable. Yuck!, i know but i have no choice.
 float TextureMixtransparency;
 
 int main() {
@@ -39,24 +36,21 @@ int main() {
 		return -1;
 	}
 	glViewport(0, 0, 800, 600);
-	
 
 	// function declarations start
 	void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 	void processInput(GLFWwindow * window);
 	// function declarations end
 
-
 	// set window resize callback
 	glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
-
 
 	// Data Start
 
 	// Vertex data and coordinates start
 	
 	float vertices[] = {
-	// first rectangle with vertices, color and texel floats/coordinates
+	// cube with vertices, color and texel floats/coordinates
 
 		 // front face
 		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
@@ -106,7 +100,6 @@ int main() {
 		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
 		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
-
 	};
 
 	// Vertex data and coordinates end
@@ -117,8 +110,8 @@ int main() {
 	// generate a buffer object name (unique identifier) in OpenGL and store it in VBO
 	glGenBuffers(1, &VBO);
 
-
 	// Vertex array object to recording start
+
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -203,8 +196,8 @@ int main() {
 
 	// prep for rendering
 	shader1.use();
+
 	//set uniform values after glUseProgram() (currently located in shader1.use()
-	
 	// set the location of the texture samplers
 	shader1.setInt("texture1", 0);
 	shader1.setInt("texture2", 1);
@@ -239,17 +232,18 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		// replace the current state with the previously declared display and depth state
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		// update currerntly active texture
 		glActiveTexture(GL_TEXTURE0);
 		// bind texture sampler to currently active texture unit
 		glBindTexture(GL_TEXTURE_2D, texture1);
+		// update currerntly active texture
 		glActiveTexture(GL_TEXTURE1);
 		// bind texture sampler to currently active texture unit
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-
 		// Update state
 		shader1.use();
+
 		// Space projection start
 
 		for (int x = 0; x < 10; x++) {
@@ -263,7 +257,7 @@ int main() {
 
 			// conversion from world space to view space via the View matrix
 			glm::mat4 view;
-			// Move the camera backwards (+ve z axis) by moving the scene forwards (-ve z axis)
+			// Move the camera backwards (zoom out in the +ve z axis) by moving the scene forwards (further away in the -ve z axis)
 			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 			shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
 
@@ -273,8 +267,7 @@ int main() {
 			//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
 			shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
 
-			// Space projection end
-
+		// Space projection end
 
 			// Rebind
 			glBindVertexArray(VAO);
@@ -285,7 +278,6 @@ int main() {
 			// Render current state
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		
 
 		// rendering end
 
@@ -310,6 +302,7 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
+
 // Process input
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
