@@ -258,7 +258,7 @@ int main() {
 			// Rotate on the x-axis
 			// rotation is persistent translation is not, order matters.
 			model = glm::translate(model, cubePositions[x]);
-			model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, (float)glfwGetTime() + (float)x, glm::vec3(1.0f, 1.0f, 0.0f));
 			shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
 
 			// conversion from world space to view space via the View matrix
