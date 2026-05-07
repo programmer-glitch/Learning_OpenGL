@@ -209,6 +209,19 @@ int main() {
 	shader1.setInt("texture1", 0);
 	shader1.setInt("texture2", 1);
 
+	// world position of the objects
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(1.5f, 0.1f, -1.0f),
+		glm::vec3(1.5f, 1.5f, -2.0f),
+		glm::vec3(-0.5f, 1.5f, -3.0f),
+		glm::vec3(-3.0f, 0.0f, -5.0f),
+		glm::vec3(-4.0f, 3.0f, -8.0f),
+		glm::vec3(4.0f, -3.0f, -10.0f),
+		glm::vec3(-4.5f, -3.0f, -11.0f),
+		glm::vec3(-5.0f, -4.0f, -7.0f),
+		glm::vec3(-1.5f, -3.0f, -6.0f),
+	};
 
 	// Render Loop start
 	while (!(glfwWindowShouldClose(window))) {
@@ -239,35 +252,39 @@ int main() {
 		shader1.use();
 		// Space projection start
 
-	// conversion from local space to world space via the Model matrix
-		glm::mat4 model = glm::mat4(1.0f);
-		// Rotate on the x-axis
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
-		shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
+		for (int x = 0; x < 10; x++) {
+			// conversion from local space to world space via the Model matrix
+			glm::mat4 model = glm::mat4(1.0f);
+			// Rotate on the x-axis
+			// rotation is persistent translation is not, order matters.
+			model = glm::translate(model, cubePositions[x]);
+			model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
+			shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
 
-		// conversion from world space to view space via the View matrix
-		glm::mat4 view;
-		// Move the camera backwards (+ve z axis) by moving the scene forwards (-ve z axis)
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-		shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
-		
-		// conversion from view space to clip space via the Projection matrix
-		glm::mat4 proj;
-		proj = glm::perspective(glm::radians(45.0f), (800.0f / 600.0f), 0.01f, 100.0f);
-		//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
-		shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
+			// conversion from world space to view space via the View matrix
+			glm::mat4 view;
+			// Move the camera backwards (+ve z axis) by moving the scene forwards (-ve z axis)
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+			shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
 
-		// Space projection end
-		
-		
-		// Rebind
-		glBindVertexArray(VAO);
+			// conversion from view space to clip space via the Projection matrix
+			glm::mat4 proj;
+			proj = glm::perspective(glm::radians(50.0f), (800.0f / 600.0f), 0.01f, 100.0f);
+			//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
+			shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
 
-		// Render mode
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			// Space projection end
 
-		// Render current state
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			// Rebind
+			glBindVertexArray(VAO);
+
+			// Render mode
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+			// Render current state
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		
 
 		// rendering end
