@@ -57,10 +57,55 @@ int main() {
 	
 	float vertices[] = {
 	// first rectangle with vertices, color and texel floats/coordinates
-		-0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // EBO index 0
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // EBO index 1
-		 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, // EBO index 2
-		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // EBO index 3 
+
+		 // front face
+		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+		 // top face
+		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+
+		 // left face
+		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+
+		 // bottom face
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+
+		 // right face
+		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+
+		 // back face
+		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+
 
 	};
 
@@ -72,15 +117,6 @@ int main() {
 	// generate a buffer object name (unique identifier) in OpenGL and store it in VBO
 	glGenBuffers(1, &VBO);
 
-	// EBO indicies
-	unsigned int indicies[]{
-		0, 1, 2,
-		1, 2, 3,
-		
-	};
-	// Element buffer object
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
 
 	// Vertex array object to recording start
 	unsigned int VAO;
@@ -89,15 +125,10 @@ int main() {
 	// use the buffer object as a vertex buffer object. Anytime we target GL_ARRAY_BUFFER,
 	// we would refer to the recently bound buffer which in this case would be VBO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// use the buffer object as a Element buffer object. Anytime we target GL_ELEMENT_ARRAY_BUFFER,
-	// we would refer to the recently bound buffer which in this case would be EBO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	// allocate memory on the GPU for the buffer object currently bound to GL_ARRAY_BUFFER which in this case is VBO
 	// then store the vertices with a hint on how it would be accessed in this case GL_STATIC_DRAW
-	glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (5*36) * sizeof(float), 0, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	// allocate memory on the GPU for the buffer object currently bound to GL_ELEMENT_ARRAY_BUFFER which in this case is EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 	// vertex position layout in vertices array
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	// Activate the vertex position attributes to be passed to the vertex shader program at location Zero
@@ -115,7 +146,7 @@ int main() {
 	// ------------ TEXTURES --------------
 
 	// Texture data and coordinates start
-
+	
 	// generating a texture
 	unsigned int texture1;
 	glGenTextures(1, &texture1);
@@ -131,7 +162,7 @@ int main() {
 
 	// Image width, height and number of channels
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("Container.jpg", &width, &height, &nrChannels, 0);
 	if (data) {
 		// generate a texture
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -170,28 +201,32 @@ int main() {
 
 	// Texture data and coordinates end
 
-	// Vector transformation start
-	/*glm::vec3 vec(0.5f, -0.5f, 0.0f);
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, vec);
-	trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));*/
 
-	// Vector transformation end
-
-	// View projection start
+	// Space projection start
 
 	// conversion from local space to world space via the Model matrix
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
-	// View projection end
+	// Rotate on the x-axis
+	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	
+
+	// conversion from world space to view space via the View matrix
+	glm::mat4 view;
+	// Move the camera backwards (+ve z axis) by moving the scene forwards (-ve z axis)
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	// conversion from view space to clip space via the Projection matrix
+	glm::mat4 proj;
+	proj = glm::perspective(glm::radians(45.0f), (800.0f / 600.0f), 0.1f, 100.0f);
+	
+	// Space projection end
 
 	// prep for rendering
 	shader1.use();
-	// set the vertex offset uniform values
+	//set uniform values after glUseProgram() (currently located in shader1.use()
 	shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
-	//set uniform values
+	shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
+	shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
 	// set the location of the texture samplers
 	shader1.setInt("texture1", 0);
 	shader1.setInt("texture2", 1);
@@ -203,13 +238,6 @@ int main() {
 		processInput(window);
 		// update things
 		shader1.setFloat1("texMixTrans", TextureMixtransparency);
-
-		//glm::mat4 trans = glm::mat4(1.0f); // redefine to reset rotation starting point
-		//vec = glm::vec3(0.0f, 0.0f, 0.0f);
-		//trans = glm::translate(trans, vec);
-		//trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		//trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-		//shader1.setMat4("Offset", 1, GL_FALSE, glm::value_ptr(trans));
 		
 		// rendering start
 
@@ -225,16 +253,20 @@ int main() {
 		// bind texture sampler to currently active texture unit
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
+		// spin the cube
+		model = glm::rotate(model, (glm::radians(15.0f)) * 0.003f, glm::vec3(0.0f, 1.0f, 0.0f));
+
 		// Update state
 		shader1.use();
+		shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
 		// Rebind
 		glBindVertexArray(VAO);
 
 		// Render mode
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		// Render current state
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 
 		// rendering end
@@ -247,7 +279,6 @@ int main() {
 	// Free memory
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
 
