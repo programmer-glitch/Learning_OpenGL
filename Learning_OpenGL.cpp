@@ -76,35 +76,35 @@ int main() {
 
 		 // left face
 		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
 		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
 		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
 		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
 
 		 // bottom face
 		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
 		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
 		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+		 -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
 
 		 // right face
 		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
 		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
 		 // back face
-		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
-		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+		 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
 		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
 		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
 
 	};
@@ -201,32 +201,10 @@ int main() {
 
 	// Texture data and coordinates end
 
-
-	// Space projection start
-
-	// conversion from local space to world space via the Model matrix
-	glm::mat4 model = glm::mat4(1.0f);
-	// Rotate on the x-axis
-	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	
-
-	// conversion from world space to view space via the View matrix
-	glm::mat4 view;
-	// Move the camera backwards (+ve z axis) by moving the scene forwards (-ve z axis)
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-	// conversion from view space to clip space via the Projection matrix
-	glm::mat4 proj;
-	proj = glm::perspective(glm::radians(45.0f), (800.0f / 600.0f), 0.1f, 100.0f);
-	
-	// Space projection end
-
 	// prep for rendering
 	shader1.use();
 	//set uniform values after glUseProgram() (currently located in shader1.use()
-	shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
-	shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
-	shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
+	
 	// set the location of the texture samplers
 	shader1.setInt("texture1", 0);
 	shader1.setInt("texture2", 1);
@@ -241,10 +219,13 @@ int main() {
 		
 		// rendering start
 
+		// enable depth testing
+		glEnable(GL_DEPTH_TEST);
+
 		// set the state of the display color
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		// replace the current state with the previously declared display state
-		glClear(GL_COLOR_BUFFER_BIT);
+		// replace the current state with the previously declared display and depth state
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		// bind texture sampler to currently active texture unit
@@ -253,17 +234,37 @@ int main() {
 		// bind texture sampler to currently active texture unit
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-		// spin the cube
-		model = glm::rotate(model, (glm::radians(15.0f)) * 0.003f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Update state
 		shader1.use();
+		// Space projection start
+
+	// conversion from local space to world space via the Model matrix
+		glm::mat4 model = glm::mat4(1.0f);
+		// Rotate on the x-axis
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
 		shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
+
+		// conversion from world space to view space via the View matrix
+		glm::mat4 view;
+		// Move the camera backwards (+ve z axis) by moving the scene forwards (-ve z axis)
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
+		
+		// conversion from view space to clip space via the Projection matrix
+		glm::mat4 proj;
+		proj = glm::perspective(glm::radians(45.0f), (800.0f / 600.0f), 0.01f, 100.0f);
+		//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
+		shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
+
+		// Space projection end
+		
+		
 		// Rebind
 		glBindVertexArray(VAO);
 
 		// Render mode
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		// Render current state
 		glDrawArrays(GL_TRIANGLES, 0, 36);
