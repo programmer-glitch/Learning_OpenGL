@@ -13,6 +13,18 @@
 
 float TextureMixtransparency;
 
+// the direction with which the camera would be facing in view space
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+// to give the camera proper orientation in view space
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float cameraSpeed = 10.0f;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+
+// deltaTime
+float currentTime = 0.0f;
+float lastTime = 0.0f;
+float deltaTime = 0.0f;
+
 int main() {
 
 	glfwInit();
@@ -48,7 +60,6 @@ int main() {
 	// Data Start
 
 	// Vertex data and coordinates start
-	
 	float vertices[] = {
 	// cube with vertices, color and texel floats/coordinates
 
@@ -101,7 +112,6 @@ int main() {
 		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
 	};
-
 	// Vertex data and coordinates end
 
 	// Data end
@@ -110,8 +120,7 @@ int main() {
 	// generate a buffer object name (unique identifier) in OpenGL and store it in VBO
 	glGenBuffers(1, &VBO);
 
-	// Vertex array object to recording start
-
+	// Vertex array object recording start
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -130,7 +139,6 @@ int main() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * (sizeof(float))));
 	// Activate the texture map coordinates to be passed to the vertex shader program at location Two
 	glEnableVertexAttribArray(1);
-
 	// Vertex array object recording end
 	
 	// Create, compile and activate Shader program
@@ -210,21 +218,27 @@ int main() {
 		glm::vec3(-0.5f, 1.5f, -3.0f),
 		glm::vec3(-3.0f, 0.0f, -5.0f),
 		glm::vec3(-4.0f, 3.0f, -8.0f),
-		glm::vec3(4.0f, -3.0f, -10.0f),
+		glm::vec3(7.0f, -3.0f, -10.0f),
 		glm::vec3(-4.5f, -3.0f, -11.0f),
 		glm::vec3(-5.0f, -4.0f, -7.0f),
 		glm::vec3(-1.5f, -3.0f, -6.0f),
 	};
 
+	glm::mat4 proj;
+	proj = glm::perspective(glm::radians(50.0f), (800.0f / 600.0f), 0.01f, 100.0f);
+	//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
+	// conversion from view space to clip space via the Projection matrix (no need to do this per frame)
+	shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
+
+
 	// Render Loop start
 	while (!(glfwWindowShouldClose(window))) {
+		glm::mat4 view;
 		// Lookout for window input
 		processInput(window);
 		// update things
 		shader1.setFloat1("texMixTrans", TextureMixtransparency);
 		
-		// rendering start
-
 		// enable depth testing
 		glEnable(GL_DEPTH_TEST);
 
@@ -244,30 +258,21 @@ int main() {
 		// Update state
 		shader1.use();
 
-		// Space projection start
+		// Camera position in view space
+		view = glm::lookAt(cameraPos, (cameraPos + cameraFront), cameraUp);
 
+		// conversion from world space to view space via the View matrix
+		shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
+		
 		for (int x = 0; x < 10; x++) {
-			// conversion from local space to world space via the Model matrix
 			glm::mat4 model = glm::mat4(1.0f);
 			// Rotate on the x-axis
 			// rotation is persistent translation is not, order matters.
 			model = glm::translate(model, cubePositions[x]);
 			model = glm::rotate(model, (float)glfwGetTime() + (float)x, glm::vec3(1.0f, 1.0f, 0.0f));
+			
+			// conversion from local space to world space via the Model matrix
 			shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
-
-			// conversion from world space to view space via the View matrix
-			glm::mat4 view;
-			// Move the camera backwards (zoom out in the +ve z axis) by moving the scene forwards (further away in the -ve z axis)
-			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-			shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
-
-			// conversion from view space to clip space via the Projection matrix
-			glm::mat4 proj;
-			proj = glm::perspective(glm::radians(50.0f), (800.0f / 600.0f), 0.01f, 100.0f);
-			//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
-			shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
-
-		// Space projection end
 
 			// Rebind
 			glBindVertexArray(VAO);
@@ -278,8 +283,6 @@ int main() {
 			// Render current state
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
-		// rendering end
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -303,8 +306,10 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+
 // Process input
 void processInput(GLFWwindow* window) {
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -320,5 +325,30 @@ void processInput(GLFWwindow* window) {
 			TextureMixtransparency = 0.0;
 		}
 	}
+
+	// Calculate deltaTime for stable FPS
+	currentTime = glfwGetTime();
+	deltaTime = currentTime - lastTime;
+	lastTime = currentTime;
+
+	// Camera control
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		cameraPos += cameraSpeed * cameraFront * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		cameraPos -= cameraSpeed * cameraFront * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_A)) {
+		cameraPos -= cameraSpeed * (glm::normalize(glm::cross(cameraFront, cameraUp))) * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		cameraPos += cameraSpeed * (glm::normalize(glm::cross(cameraFront, cameraUp))) * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+		cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	}
+	// debugging
+	std::cout << "deltaTime is: " << deltaTime << '\n';
 }
+
 // function definition end
