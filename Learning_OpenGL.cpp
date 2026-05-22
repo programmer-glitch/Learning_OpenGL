@@ -25,6 +25,15 @@ float currentTime = 0.0f;
 float lastTime = 0.0f;
 float deltaTime = 0.0f;
 
+//mouse position
+float lastX = 400, lastY = 300;
+float yaw = -90.0f, pitch = 0.0f;
+bool firstMouse = true;
+
+// camera fov
+float fov = 45.0f;
+
+
 int main() {
 
 	glfwInit();
@@ -51,7 +60,9 @@ int main() {
 
 	// function declarations start
 	void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
-	void processInput(GLFWwindow * window);
+	void mouseCallback(GLFWwindow* window, double xPos, double yPos);
+	void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
+	void processInput(GLFWwindow* window);
 	// function declarations end
 
 	// set window resize callback
@@ -224,18 +235,24 @@ int main() {
 		glm::vec3(-1.5f, -3.0f, -6.0f),
 	};
 
-	glm::mat4 proj;
-	proj = glm::perspective(glm::radians(50.0f), (800.0f / 600.0f), 0.01f, 100.0f);
-	//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
-	// conversion from view space to clip space via the Projection matrix (no need to do this per frame)
-	shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
-
 
 	// Render Loop start
 	while (!(glfwWindowShouldClose(window))) {
+
+		// Calculate deltaTime for stable FPS
+		currentTime = glfwGetTime();
+		deltaTime = currentTime - lastTime;
+		lastTime = currentTime;
+
 		glm::mat4 view;
 		// Lookout for window input
 		processInput(window);
+
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetCursorPosCallback(window, mouseCallback);
+		glfwSetScrollCallback(window, scrollCallback);
+
+
 		// update things
 		shader1.setFloat1("texMixTrans", TextureMixtransparency);
 		
@@ -262,6 +279,11 @@ int main() {
 		view = glm::lookAt(cameraPos, (cameraPos + cameraFront), cameraUp);
 
 		// conversion from world space to view space via the View matrix
+		glm::mat4 proj;
+		proj = glm::perspective(glm::radians(fov), (800.0f / 600.0f), 0.01f, 100.0f);
+		//proj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.01f, 100.0f);
+		// conversion from view space to clip space via the Projection matrix (no need to do this per frame)
+		shader1.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
 		shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
 		
 		for (int x = 0; x < 10; x++) {
@@ -284,6 +306,7 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -306,6 +329,54 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+// Callback function for mouse position
+void mouseCallback(GLFWwindow* window, double xPos, double yPos) {
+	
+	if (firstMouse) {
+		lastX = xPos;
+		lastY = yPos;
+		firstMouse = false;
+	}
+
+	float xOffset = xPos - lastX;
+	float yOffset = lastY - yPos;
+	lastX = xPos;
+	lastY = yPos;
+
+	float sensitivity = 0.1f;
+	xOffset *= sensitivity;
+	yOffset *= sensitivity;
+
+	yaw += xOffset;
+	pitch += yOffset;
+
+	if (pitch > 89.0f) {
+		pitch = 89.0f;
+	}
+	else if (pitch < -89.0f) {
+		pitch = -89.0f;
+	}
+
+		glm::vec3 direction;
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(direction);
+
+}
+
+// callback function for zoom
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+	fov += (float)yOffset;
+	if (fov < 1.0f) {
+		fov = 1.0f;
+	}
+	else if (fov > 45.0f) {
+		fov = 45.0f;
+	}
+	std::cout << "scroll xOffset: " << xOffset << "\t scroll yOffset: " << yOffset << "\tfov: " << fov << '\n';
+}
+
 
 // Process input
 void processInput(GLFWwindow* window) {
@@ -314,22 +385,17 @@ void processInput(GLFWwindow* window) {
 		glfwSetWindowShouldClose(window, true);
 	}
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		TextureMixtransparency += 0.001;
+		TextureMixtransparency += 0.001f;
 		if (TextureMixtransparency > 0.9) {
 			TextureMixtransparency = 1.0;
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		TextureMixtransparency -= 0.001;
+		TextureMixtransparency -= 0.001f;
 		if (TextureMixtransparency < 0.0) {
 			TextureMixtransparency = 0.0;
 		}
 	}
-
-	// Calculate deltaTime for stable FPS
-	currentTime = glfwGetTime();
-	deltaTime = currentTime - lastTime;
-	lastTime = currentTime;
 
 	// Camera control
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -346,9 +412,8 @@ void processInput(GLFWwindow* window) {
 	}
 	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 		cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+		cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	}
-	// debugging
-	std::cout << "deltaTime is: " << deltaTime << '\n';
 }
 
 // function definition end
