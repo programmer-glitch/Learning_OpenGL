@@ -140,6 +140,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragmentShader.glsl" />
+    <None Include="lightFragmentShader.glsl" />
+    <None Include="objectFragmentShader.glsl" />
+    <None Include="lightVertexShader.glsl" />
     <None Include="vertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>

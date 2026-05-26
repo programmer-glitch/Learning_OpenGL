@@ -29,6 +29,15 @@
     <None Include="fragmentShader.glsl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="lightVertexShader.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="objectFragmentShader.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="lightFragmentShader.glsl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
