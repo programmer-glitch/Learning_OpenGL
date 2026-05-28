@@ -239,8 +239,7 @@ int main() {
 
 	// world position of the objects
 	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-
-	glm::vec3 lightCubePosition = glm::vec3(2.0f, 1.5f, 0.0f);
+	glm::vec3 lightCubePosition = glm::vec3(1.2f, 1.0f, 2.0f);
 
 	cameraOne.MovementSpeed = 7.0f;
 	cameraOne.Position = glm::vec3(0.0f, 0.0f, 7.0f);
@@ -299,7 +298,6 @@ int main() {
 		// Rotate on the x-axis
 		// rotation is persistent translation is not, order matters.
 		model = glm::translate(model, cubePosition);
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
 		// conversion from local space to world space via the Model matrix
 		shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
 
@@ -318,8 +316,8 @@ int main() {
 
 		// Light source Cube
 		glBindVertexArray(lightVAO);
-		model = glm::rotate(model, -((float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
-		model = glm::translate(model, lightCubePosition);	
+		model = glm::translate(model, lightCubePosition);
+		model = glm::scale(model, glm::vec3(0.2f));
 		shader2.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
 		shader2.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
 		shader2.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));

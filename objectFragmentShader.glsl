@@ -4,7 +4,9 @@ out vec4 fragColor;
 
 uniform vec3 lightColor;
 uniform vec3 objectColor;
+vec3 finalColor;
 
  void main(){
-	fragColor = vec4((lightColor * objectColor), 1.0f);
+	finalColor = lightColor * objectColor;
+	fragColor = vec4(finalColor, 1.0f);
  }
