@@ -27,6 +27,9 @@ bool firstMouse = true;
 // Spawn a camera
 Camera cameraOne;
 
+// Object ambient color
+float ambientValue = 0.5f;
+
 
 int main() {
 
@@ -66,55 +69,55 @@ int main() {
 
 	// Vertex data and coordinates start
 	float vertices[] = {
-	// cube with vertices, color and texel floats/coordinates
+	// cube with vertices, texel floats/coordinates and normals for the faces which represents the corresponding vertex
 
 		 // front face
-		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		 -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
 
 		 // top face
-		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
-		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
-		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
 
 		 // left face
-		 -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-		 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-		 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		 -0.5f, 0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+		 -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
 
 		 // bottom face
-		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-		 -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-		 -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		 -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
 
 		 // right face
-		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-		 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
 
 		 // back face
-		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-		 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-		 0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+		 0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+		 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+		 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+		 0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
 
 	};
 	// Vertex data and coordinates end
@@ -134,17 +137,20 @@ int main() {
 	// vertex buffer object (for the cube target object)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	// allocate memory on the GPU for the buffer object currently bound to GL_ARRAY_BUFFER which in this case is VBO with a hint on how it would be accessed in this case GL_STATIC_DRAW
-	glBufferData(GL_ARRAY_BUFFER, (5*36) * sizeof(float), 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (6*36) * sizeof(float), 0, GL_STATIC_DRAW);
 	// Insert the vertices data(co-ordinates) into the previously allocated storage
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 	// vertex position layout in vertices array
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	// Activate the vertex position attributes to be passed to the vertex shader program at location Zero
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	// Activate the vertex position attributes to be passed to the vertex shader program at location Two
 	glEnableVertexAttribArray(2);
-	// vertex texel (or texture pixel or texture map) coordinates
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * (sizeof(float))));
-	// Activate the texture map coordinates to be passed to the vertex shader program at location Two
+	// Normals position layout in the vertices array
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	// vertex texel (or texture pixel or texture map) coordinates
+	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * (sizeof(float))));
+	//// Activate the texture map coordinates to be passed to the vertex shader program at location One
+	//glEnableVertexAttribArray(1);
 
 	// unbind VAO
 	glBindVertexArray(0);
@@ -156,7 +162,7 @@ int main() {
 	glBindVertexArray(lightVAO);
 	// vertex buffer object (for the cube lighting object)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(2);
 
 	// Vertex array object recording end
@@ -225,24 +231,30 @@ int main() {
 
 	// Texture data and coordinates end
 
+
+	// world position of the objects
+	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 lightCubePosition = glm::vec3(0.5f, 1.0f, 1.5f);
+
+	cameraOne.MovementSpeed = 7.0f;
+	cameraOne.Position = glm::vec3(0.0f, 0.0f, 7.0f);
+
 	// prep for rendering
 	shader1.use();
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 	glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
 	shader1.setFloat3("lightColor", lightColor);
+	shader1.setFloat3("lightPosition", lightCubePosition);
 	shader1.setFloat3("objectColor", objectColor);
+	shader1.setFloat1("ambientStrength", ambientValue);
+	shader1.setFloat3("viewerPos", cameraOne.Position);
+
 
 	//set uniform values after glUseProgram() (currently located in shader1.use()
 	// set the location of the texture samplers
 	//shader1.setInt("texture1", 0);
 	//shader1.setInt("texture2", 1);
 
-	// world position of the objects
-	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 lightCubePosition = glm::vec3(1.2f, 1.0f, 2.0f);
-
-	cameraOne.MovementSpeed = 7.0f;
-	cameraOne.Position = glm::vec3(0.0f, 0.0f, 7.0f);
 
 	// Render Loop start
 	while (!(glfwWindowShouldClose(window))) {
@@ -268,7 +280,7 @@ int main() {
 		glEnable(GL_DEPTH_TEST);
 
 		// set the state of the display color
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		// replace the current state with the previously declared display and depth state
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// update currerntly active texture
@@ -307,17 +319,18 @@ int main() {
 		// Render mode
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		// Render current state
+		// Render object cube
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
 		
+		// switch shaders
 		shader2.use();
 
 		// Light source Cube
 		glBindVertexArray(lightVAO);
 		model = glm::translate(model, lightCubePosition);
-		model = glm::scale(model, glm::vec3(0.2f));
+		model = glm::scale(model, glm::vec3(0.25f));
 		shader2.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
 		shader2.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
 		shader2.setMat4("Proj", 1, GL_FALSE, glm::value_ptr(proj));
@@ -326,7 +339,7 @@ int main() {
 		// Render mode
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		// Render current state
+		// Render light source cube
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
@@ -385,15 +398,15 @@ void processInput(GLFWwindow* window) {
 		glfwSetWindowShouldClose(window, true);
 	}
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		TextureMixtransparency += 0.001f;
-		if (TextureMixtransparency > 0.9) {
-			TextureMixtransparency = 1.0;
+		ambientValue += 0.001f;
+		if (ambientValue > 0.9) {
+			ambientValue = 1.0;
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		TextureMixtransparency -= 0.001f;
-		if (TextureMixtransparency < 0.0) {
-			TextureMixtransparency = 0.0;
+		ambientValue -= 0.001f;
+		if (ambientValue < 0.0) {
+			ambientValue = 0.0;
 		}
 	}
 
