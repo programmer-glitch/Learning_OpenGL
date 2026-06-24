@@ -234,7 +234,7 @@ int main() {
 
 	// world position of the objects
 	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 lightCubePosition = glm::vec3(0.5f, 1.0f, 1.5f);
+	glm::vec3 lightCubePosition = glm::vec3(0.5f, 0.25f, 1.5f);
 
 	cameraOne.MovementSpeed = 7.0f;
 	cameraOne.Position = glm::vec3(0.0f, 0.0f, 7.0f);
@@ -244,7 +244,7 @@ int main() {
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 	glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
 	shader1.setFloat3("lightColor", lightColor);
-	shader1.setFloat3("lightPosition", lightCubePosition);
+	//shader1.setFloat3("lightPosition", lightCubePosition);
 	shader1.setFloat3("objectColor", objectColor);
 	shader1.setFloat1("ambientStrength", ambientValue);
 	shader1.setFloat3("viewerPos", cameraOne.Position);
@@ -295,6 +295,9 @@ int main() {
 		// Update state
 		shader1.use();
 
+		// had to put this here so i can update the uniform regularly
+		shader1.setFloat3("lightCubePosition", glm::vec3(lightCubePosition.x * sin(glfwGetTime() * 2), lightCubePosition.y * cos(glfwGetTime() * 2), lightCubePosition.z));
+
 		// Camera position in view space
 		view = cameraOne.GetViewMatrix();
 
@@ -307,8 +310,6 @@ int main() {
 		shader1.setMat4("View", 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 model = glm::mat4(1.0f);
-		// Rotate on the x-axis
-		// rotation is persistent translation is not, order matters.
 		model = glm::translate(model, cubePosition);
 		// conversion from local space to world space via the Model matrix
 		shader1.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
@@ -322,6 +323,7 @@ int main() {
 		// Render object cube
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		// unbind VAO
 		glBindVertexArray(0);
 		
 		// switch shaders
@@ -329,6 +331,7 @@ int main() {
 
 		// Light source Cube
 		glBindVertexArray(lightVAO);
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::translate(model, lightCubePosition);
 		model = glm::scale(model, glm::vec3(0.25f));
 		shader2.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
@@ -342,6 +345,7 @@ int main() {
 		// Render light source cube
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		// unbind VAO
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);

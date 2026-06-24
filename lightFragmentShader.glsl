@@ -7,6 +7,7 @@ out vec4 fragColor;
 // Uniform variable set outside the file
 uniform vec3 lightColor;
 
+
  void main(){
 	fragColor = vec4(lightColor, 1.0f);
  }

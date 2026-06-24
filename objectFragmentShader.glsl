@@ -17,15 +17,19 @@ vec3 reflectDir;
 float spec;
 vec3 specularReflection;
 
+
 // variable values are set outside in the cpp code file
 uniform vec3 lightColor;
-uniform vec3 lightPosition;
+// uniform vec3 lightPosition;
+uniform vec3 lightCubePosition;
+vec3 lightPosition;
 uniform vec3 objectColor;
 uniform float ambientStrength;
 uniform vec3 viewerPos;
 
 
  void main(){
+	lightPosition = lightCubePosition;
 	ambientReflection = lightColor * ambientStrength;
 	norm = normalize(normal);
 	lightDir = normalize(lightPosition - fragPos);
