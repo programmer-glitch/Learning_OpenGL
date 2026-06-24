@@ -296,8 +296,8 @@ int main() {
 		shader1.use();
 
 		// had to put this here so i can update the uniform regularly
-		shader1.setFloat3("lightCubePosition", glm::vec3(lightCubePosition.x * sin(glfwGetTime() * 2), (lightCubePosition.y+0.5f) * cos(glfwGetTime() * 2), lightCubePosition.z));
-
+		shader1.setFloat3("lightCubePosition", lightCubePosition);
+		
 		// Camera position in view space
 		view = cameraOne.GetViewMatrix();
 
@@ -331,7 +331,7 @@ int main() {
 
 		// Light source Cube
 		glBindVertexArray(lightVAO);
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+		lightCubePosition = glm::vec3(0.5f * sin(glfwGetTime() * 3), 0.5f * cos(glfwGetTime() * 3), 1.5f);
 		model = glm::translate(model, lightCubePosition);
 		model = glm::scale(model, glm::vec3(0.25f));
 		shader2.setMat4("Model", 1, GL_FALSE, glm::value_ptr(model));
