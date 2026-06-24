@@ -234,7 +234,7 @@ int main() {
 
 	// world position of the objects
 	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 lightCubePosition = glm::vec3(0.5f, 0.25f, 1.5f);
+	glm::vec3 lightCubePosition = glm::vec3(0.5f, 0.0f, 1.5f);
 
 	cameraOne.MovementSpeed = 7.0f;
 	cameraOne.Position = glm::vec3(0.0f, 0.0f, 7.0f);
@@ -296,7 +296,7 @@ int main() {
 		shader1.use();
 
 		// had to put this here so i can update the uniform regularly
-		shader1.setFloat3("lightCubePosition", glm::vec3(lightCubePosition.x * sin(glfwGetTime() * 2), lightCubePosition.y * cos(glfwGetTime() * 2), lightCubePosition.z));
+		shader1.setFloat3("lightCubePosition", glm::vec3(lightCubePosition.x * sin(glfwGetTime() * 2), (lightCubePosition.y+0.5f) * cos(glfwGetTime() * 2), lightCubePosition.z));
 
 		// Camera position in view space
 		view = cameraOne.GetViewMatrix();
